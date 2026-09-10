@@ -32,7 +32,10 @@ MAJOR = 3
 MINOR = 34
 
 # BUILD number used for the OSS version.
-BUILD_OSS = 6239
+# atok-custom: incremented from 6239 to 6240 for local dev builds
+# (forces MSI upgrade detection; REVISION is left at 100 since it
+# encodes the Windows/macOS channel, not a free-running build counter).
+BUILD_OSS = 6240
 
 # Number to be increased. This value may be replaced by other tools.
 BUILD = BUILD_OSS

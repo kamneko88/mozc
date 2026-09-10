@@ -55,9 +55,12 @@ constexpr TF_DISPLAYATTRIBUTE kInputAttribute = {
 
 constexpr std::wstring_view kConvertedDescription =
     L"TextService Display Attribute Converted";
+// atok-custom: ATOK風に「変換中」をシアンハイライトで明示する。
+// 色はATOK for Windows 一太郎2020 Limitedの実機スクリーンショットから
+// RGB値を実測して再現（背景=シアン、文字=黒）。
 constexpr TF_DISPLAYATTRIBUTE kConvertedAttribute = {
-    {TF_CT_NONE, {}},         // text color
-    {TF_CT_NONE, {}},         // background color
+    {TF_CT_COLORREF, RGB(0, 0, 0)},      // text color: 黒
+    {TF_CT_COLORREF, RGB(0, 255, 255)},  // background color: シアン
     TF_LS_SOLID,              // underline style
     TRUE,                     // underline boldness
     {TF_CT_NONE, {}},         // underline color
