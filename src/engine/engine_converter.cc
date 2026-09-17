@@ -1096,6 +1096,11 @@ void EngineConverter::ResizeSegmentWidth(const composer::Composer& composer,
   }
 
   UpdateCandidateList();
+  // ATOK-like behavior: discard the tentative conversion candidate and
+  // revert the focused segment to its raw hiragana reading after resizing
+  // the segment boundary, rather than keeping the (now stale) top
+  // conversion candidate for the new boundary.
+  candidate_list_.MoveToAttributes(HIRAGANA);
   // Clears selected index of a focused segment and trailing segments.
   // TODO(hsumita): Keep the indices if the segment type is FIXED_VALUE.
   selected_candidate_indices_.resize(segments_.conversion_segments_size());
@@ -1675,8 +1680,16 @@ bool EngineConverter::IsFullSentenceCandidateSelected() const {
 
 void EngineConverter::FillConversion(commands::Preedit* preedit) const {
   DCHECK(CheckState(PREDICTION | CONVERSION));
+  // atok-custom: tell the output layer when the focused segment is showing
+  // its raw hiragana reading (Must #6 boundary-resize revert) rather than an
+  // explicitly selected conversion candidate, so it can be highlighted
+  // differently.
+  const bool is_focused_raw_reading =
+      (candidate_list_.focused_id() ==
+       GetT13nId(transliteration::HIRAGANA));
   output::FillConversion(segments_, segment_index_,
-                         candidate_list_.focused_id(), preedit);
+                         candidate_list_.focused_id(), is_focused_raw_reading,
+                         preedit);
 }
 
 void EngineConverter::FillResult(commands::Result* result) const {

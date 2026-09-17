@@ -82,6 +82,17 @@ class TipDisplayAttributeConverted : public TipDisplayAttribute {
   static const GUID& guid();
 };
 
+// atok-custom: represents the display attributes for a focused segment that
+// has been reverted to its raw hiragana reading after a segment-boundary
+// resize (Must #6), as opposed to TipDisplayAttributeConverted which is an
+// explicitly selected conversion candidate.
+class TipDisplayAttributeFocusedInput : public TipDisplayAttribute {
+ public:
+  TipDisplayAttributeFocusedInput();
+
+  static const GUID& guid();
+};
+
 }  // namespace tsf
 }  // namespace win32
 }  // namespace mozc

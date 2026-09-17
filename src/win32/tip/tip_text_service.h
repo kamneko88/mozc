@@ -64,6 +64,8 @@ class TipTextService : public IUnknown {
   // Returns the GUID atom for the display attributes.
   virtual TfGuidAtom input_attribute() const = 0;
   virtual TfGuidAtom converted_attribute() const = 0;
+  // atok-custom: see TipDisplayAttributeFocusedInput.
+  virtual TfGuidAtom focused_input_attribute() const = 0;
 
   // Returns the window handle of render callback window.
   // Returns nullptr if it is not available.

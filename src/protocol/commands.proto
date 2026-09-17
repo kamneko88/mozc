@@ -1277,6 +1277,11 @@ message Preedit {
       NONE = 0;
       UNDERLINE = 1;
       HIGHLIGHT = 2;
+      // atok-custom: the focused segment has been reverted to its raw
+      // hiragana reading after a segment-boundary resize (Must #6), as
+      // opposed to HIGHLIGHT which means an explicitly selected conversion
+      // candidate. Windows TSF renders this with a distinct color.
+      HIGHLIGHT_INPUT = 3;
     }
     required Annotation annotation = 3;
     required string value = 4;

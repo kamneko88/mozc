@@ -316,6 +316,9 @@ HRESULT UpdateComposition(TipTextService* text_service, ITfContext* context,
       attribute = text_service->input_attribute();
     } else if (annotation == Preedit::Segment::HIGHLIGHT) {
       attribute = text_service->converted_attribute();
+    } else if (annotation == Preedit::Segment::HIGHLIGHT_INPUT) {
+      // atok-custom: see TipDisplayAttributeFocusedInput.
+      attribute = text_service->focused_input_attribute();
     } else {  // mozc::commands::Preedit::Segment::NONE or unknown value
       continue;
     }

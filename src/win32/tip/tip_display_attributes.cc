@@ -44,10 +44,11 @@ namespace {
 
 constexpr std::wstring_view kInputDescription =
     L"TextService Display Attribute Input";
+// atok-custom: ATOKに下線表示が無いため、下線を非表示にする。
 constexpr TF_DISPLAYATTRIBUTE kInputAttribute = {
     {TF_CT_NONE, {}},  // text color
     {TF_CT_NONE, {}},  // background color
-    TF_LS_DOT,         // underline style
+    TF_LS_NONE,        // underline style
     FALSE,             // underline boldness
     {TF_CT_NONE, {}},  // underline color
     TF_ATTR_INPUT      // attribute info
@@ -58,11 +59,26 @@ constexpr std::wstring_view kConvertedDescription =
 // atok-custom: ATOK風に「変換中」をシアンハイライトで明示する。
 // 色はATOK for Windows 一太郎2020 Limitedの実機スクリーンショットから
 // RGB値を実測して再現（背景=シアン、文字=黒）。
+// atok-custom: ATOKに下線表示が無いため、下線を非表示にする。
 constexpr TF_DISPLAYATTRIBUTE kConvertedAttribute = {
     {TF_CT_COLORREF, RGB(0, 0, 0)},      // text color: 黒
     {TF_CT_COLORREF, RGB(0, 255, 255)},  // background color: シアン
-    TF_LS_SOLID,              // underline style
-    TRUE,                     // underline boldness
+    TF_LS_NONE,               // underline style
+    FALSE,                    // underline boldness
+    {TF_CT_NONE, {}},         // underline color
+    TF_ATTR_TARGET_CONVERTED  // attribute info
+};
+
+constexpr std::wstring_view kFocusedInputDescription =
+    L"TextService Display Attribute Focused Input";
+// atok-custom: 区切り調整（Must #6）でひらがなに復帰したフォーカス中文節を、
+// 明示選択された変換候補（シアン）と区別するための色。色は仮値で、
+// 実機で見比べて微調整する（2026-09-11 時点で未実測）。
+constexpr TF_DISPLAYATTRIBUTE kFocusedInputAttribute = {
+    {TF_CT_COLORREF, RGB(255, 255, 255)},  // text color: 白
+    {TF_CT_COLORREF, RGB(0, 0, 128)},      // background color: 紺色
+    TF_LS_NONE,               // underline style
+    FALSE,                    // underline boldness
     {TF_CT_NONE, {}},         // underline color
     TF_ATTR_TARGET_CONVERTED  // attribute info
 };
@@ -83,6 +99,13 @@ constexpr GUID kDisplayAttributeConverted = {
     0x4d29,
     {0xbd, 0x2f, 0xe4, 0x13, 0xa9, 0x44, 0xb7, 0xe4}};
 
+// atok-custom: {5B3E9A1C-7D42-4F1B-9C3A-1E7F2B4D6A80}
+constexpr GUID kDisplayAttributeFocusedInput = {
+    0x5b3e9a1c,
+    0x7d42,
+    0x4f1b,
+    {0x9c, 0x3a, 0x1e, 0x7f, 0x2b, 0x4d, 0x6a, 0x80}};
+
 #else  // GOOGLE_JAPANESE_INPUT_BUILD
 
 // {84CA1E7E-3020-4D1C-8968-DDA372D1E067}
@@ -98,6 +121,13 @@ constexpr GUID kDisplayAttributeConverted = {
     0x2dcd,
     0x4365,
     {0xa5, 0xdc, 0x71, 0xf6, 0x7e, 0x79, 0x74, 0x37}};
+
+// atok-custom: {C2F7A9E4-6B1D-4A8F-9E3C-2D5F8A1B7C40}
+constexpr GUID kDisplayAttributeFocusedInput = {
+    0xc2f7a9e4,
+    0x6b1d,
+    0x4a8f,
+    {0x9e, 0x3c, 0x2d, 0x5f, 0x8a, 0x1b, 0x7c, 0x40}};
 
 #endif  // !GOOGLE_JAPANESE_INPUT_BUILD
 
@@ -153,6 +183,14 @@ TipDisplayAttributeConverted::TipDisplayAttributeConverted()
 
 const GUID& TipDisplayAttributeConverted::guid() {
   return kDisplayAttributeConverted;
+}
+
+TipDisplayAttributeFocusedInput::TipDisplayAttributeFocusedInput()
+    : TipDisplayAttribute(kDisplayAttributeFocusedInput, kFocusedInputAttribute,
+                          kFocusedInputDescription) {}
+
+const GUID& TipDisplayAttributeFocusedInput::guid() {
+  return kDisplayAttributeFocusedInput;
 }
 
 }  // namespace tsf

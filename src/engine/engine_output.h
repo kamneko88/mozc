@@ -94,13 +94,21 @@ void FillPreedit(const composer::Composer& composer,
                  commands::Preedit* preedit);
 
 // Fill the Preedit protobuf with the contents of segments as a conversion.
+// atok-custom: |is_focused_raw_reading| is true iff the focused candidate is
+// the hiragana transliteration (i.e. the segment has just been reverted to
+// its raw reading after a boundary resize, Must #6). In that case the
+// focused segment is annotated HIGHLIGHT_INPUT instead of HIGHLIGHT so that
+// Windows TSF can render it with a distinct color.
 void FillConversion(const Segments& segments, size_t segment_index,
-                    int candidate_id, commands::Preedit* preedit);
+                    int candidate_id, bool is_focused_raw_reading,
+                    commands::Preedit* preedit);
 
 enum SegmentType {
   PREEDIT = 1,
   CONVERSION = 2,
   FOCUSED = 4,
+  // atok-custom: see FillConversion() above.
+  RAW_READING_FOCUS = 8,
 };
 
 // Add a Preedit::Segment protobuf to the Preedit protobuf with key

@@ -442,7 +442,13 @@ bool AddSegment(const absl::string_view key, const absl::string_view value,
   segment->set_value(std::move(normalized_value));
   segment->set_annotation(commands::Preedit::Segment::UNDERLINE);
   if ((segment_type_mask & CONVERSION) && (segment_type_mask & FOCUSED)) {
-    segment->set_annotation(commands::Preedit::Segment::HIGHLIGHT);
+    // atok-custom: distinguish the hiragana-revert state (Must #6) from an
+    // explicitly selected conversion candidate.
+    if (segment_type_mask & RAW_READING_FOCUS) {
+      segment->set_annotation(commands::Preedit::Segment::HIGHLIGHT_INPUT);
+    } else {
+      segment->set_annotation(commands::Preedit::Segment::HIGHLIGHT);
+    }
   } else {
     segment->set_annotation(commands::Preedit::Segment::UNDERLINE);
   }
@@ -479,7 +485,8 @@ absl::string_view GetKey(const Segment& segment,
 }  // namespace
 
 void FillConversion(const Segments& segments, const size_t segment_index,
-                    const int candidate_id, commands::Preedit* preedit) {
+                    const int candidate_id, const bool is_focused_raw_reading,
+                    commands::Preedit* preedit) {
   constexpr uint32_t kBaseType = CONVERSION;
   // Cursor position in conversion state should be the end of the preedit.
   size_t cursor = 0;
@@ -495,8 +502,13 @@ void FillConversion(const Segments& segments, const size_t segment_index,
     const Segment& segment = conversion_segments[i];
     if (i == focused_segment_index) {
       const converter::Candidate& candidate = segment.candidate(candidate_id);
+      uint32_t focus_type = kBaseType | FOCUSED;
+      // atok-custom: see FillConversion() declaration in engine_output.h.
+      if (is_focused_raw_reading) {
+        focus_type |= RAW_READING_FOCUS;
+      }
       if (AddSegment(GetKey(segment, candidate), candidate.value,
-                     kBaseType | FOCUSED, preedit) &&
+                     focus_type, preedit) &&
           (!preedit->has_highlighted_position())) {
         preedit->set_highlighted_position(cursor);
       }
