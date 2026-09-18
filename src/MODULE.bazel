@@ -255,6 +255,15 @@ new_local_repository(
     path = QT_PATH,  # Windows build requires the Qt source code to be in QT_PATH.
 )
 
+# mozc_custom: vendored azooKey fork of llama.cpp (Dev_note §6-20). Not part
+# of upstream google/mozc. third_party/ is entirely listed in .bazelignore,
+# so this follows the same new_local_repository pattern as qt_win above.
+new_local_repository(
+    name = "llama_cpp",
+    build_file = "@//bazel:BUILD.llama_cpp.bazel",
+    path = "third_party/llama_cpp",
+)
+
 # Windows SDK
 windows_sdk_repository = use_repo_rule(
     "@//bazel:windows_sdk_repository.bzl",

@@ -63,6 +63,7 @@
 #include "rewriter/user_segment_history_rewriter.h"
 #include "rewriter/variants_rewriter.h"
 #include "rewriter/version_rewriter.h"
+#include "rewriter/zenz_rerank_rewriter.h"
 #include "rewriter/zipcode_rewriter.h"
 
 #ifdef __APPLE__
@@ -125,6 +126,18 @@ ABSL_FLAG(bool, use_history_rewriter, true, "Use history rewriter or not.");
 #else   // MOZC_USER_HISTORY_REWRITER
 ABSL_FLAG(bool, use_history_rewriter, false, "Use history rewriter or not.");
 #endif  // MOZC_USER_HISTORY_REWRITER
+
+// mozc_custom: developer-machine path to the vendored zenz GGUF model
+// (Dev_note §6-19/§6-20/§6-21). Not part of upstream google/mozc.
+// TODO(要検証): 配布/インストーラー戦略が未確定のため、このパスは開発機専用の
+// 暫定値。実機での動作確認後、パス解決方式を再検討すること（Dev_note §7）。
+#ifdef _WIN32
+constexpr char kZenzModelPath[] =
+    "D:\\Data\\10_Projects\\dev\\mozc_custom\\_local\\models\\"
+    "zenz-v3.1-small-Q5_K_M.gguf";
+#else   // _WIN32
+constexpr char kZenzModelPath[] = "";
+#endif  // _WIN32
 
 namespace mozc {
 
@@ -197,6 +210,14 @@ Rewriter::Rewriter(const engine::Modules& modules) {
   AddRewriter(std::make_unique<RemoveRedundantCandidateRewriter>());
   AddRewriter(make_unique_from_tuples<A11yDescriptionRewriter>(
       data_manager.GetA11yDescriptionRewriterData()));
+
+  // mozc_custom: Zenz-based re-ranking of the top candidates (Should item,
+  // Dev_note §6-19/§6-21). Placed last so it sees the final candidate set
+  // produced by every other rewriter above. If the model file is missing
+  // or fails to load, ZenzRerankRewriter disables itself and Rewrite()
+  // becomes a no-op (see zenz_rerank_rewriter.h), so this is safe even
+  // when kZenzModelPath does not exist on a given machine.
+  AddRewriter(std::make_unique<ZenzRerankRewriter>(kZenzModelPath));
 }
 
 }  // namespace mozc

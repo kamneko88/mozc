@@ -1,0 +1,37 @@
+# mozc_custom original file. Not part of upstream google/mozc.
+#
+# Vendored, prebuilt static libraries for the azooKey fork of llama.cpp
+# (https://github.com/azooKey/llama.cpp), built per Dev_note §6-20 because
+# upstream ggml-org/llama.cpp does not recognize zenz's
+# "gpt2-small-japanese-char" tokenizer pre-type.
+#
+# Built with:
+#   cmake -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=OFF \
+#         -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL
+# (VS2022 BuildTools). Windows/MSVC only; this project currently targets
+# Windows exclusively (Dev_note §1).
+#
+# Registered as the "@llama_cpp" external repository via new_local_repository
+# in MODULE.bazel (see bazel/BUILD.qt_win.bazel for the established pattern
+# this follows: third_party/ is entirely listed in .bazelignore, so a plain
+# in-tree BUILD.bazel under third_party/llama_cpp would never be seen by the
+# main repo's package loader).
+
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "llama_cpp",
+    srcs = [
+        "lib/ggml-base.lib",
+        "lib/ggml-cpu.lib",
+        "lib/ggml.lib",
+        "lib/llama.lib",
+    ],
+    hdrs = glob(["include/*.h"]),
+    includes = ["include"],
+    target_compatible_with = ["@platforms//os:windows"],
+)
