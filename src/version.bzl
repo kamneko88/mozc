@@ -39,7 +39,8 @@ MINOR = 34
 # atok-custom: incremented from 6241 to 6242 (underline removal build)
 # atok-custom: incremented from 6242 to 6243 (HIGHLIGHT_INPUT color build)
 # atok-custom: incremented from 6243 to 6244 (ZenzRerankRewriter on-device test build)
-BUILD_OSS = 6244
+# atok-custom: incremented from 6244 to 6245 (ZenzRerankRewriter n_threads 4->8)
+BUILD_OSS = 6245
 
 # Number to be increased. This value may be replaced by other tools.
 BUILD = BUILD_OSS
