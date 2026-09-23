@@ -1282,6 +1282,12 @@ message Preedit {
       // opposed to HIGHLIGHT which means an explicitly selected conversion
       // candidate. Windows TSF renders this with a distinct color.
       HIGHLIGHT_INPUT = 3;
+      // atok-custom: a converted segment that is NOT the focused/target
+      // segment (i.e. a fixed conversion result shown while another
+      // segment has focus). Distinguished from UNDERLINE (raw preedit
+      // before any conversion) so the two can get different underline
+      // styles (dotted vs solid).
+      UNDERLINE_CONVERTED = 4;
     }
     required Annotation annotation = 3;
     required string value = 4;

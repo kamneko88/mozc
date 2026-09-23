@@ -82,6 +82,18 @@ class TipDisplayAttributeConverted : public TipDisplayAttribute {
   static const GUID& guid();
 };
 
+// atok-custom: represents the display attributes for a converted segment
+// that is NOT the focused/target segment (a fixed conversion result shown
+// while another segment has focus). Distinct from TipDisplayAttributeInput
+// (raw preedit before any conversion) so the two can use different
+// underline styles.
+class TipDisplayAttributeConvertedUnfocused : public TipDisplayAttribute {
+ public:
+  TipDisplayAttributeConvertedUnfocused();
+
+  static const GUID& guid();
+};
+
 // atok-custom: represents the display attributes for a focused segment that
 // has been reverted to its raw hiragana reading after a segment-boundary
 // resize (Must #6), as opposed to TipDisplayAttributeConverted which is an

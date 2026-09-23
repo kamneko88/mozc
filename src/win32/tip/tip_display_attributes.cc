@@ -44,14 +44,17 @@ namespace {
 
 constexpr std::wstring_view kInputDescription =
     L"TextService Display Attribute Input";
-// atok-custom: ATOKに下線表示が無いため、下線を非表示にする。
+// atok-custom: 2026-09-23改定。ATOKは未変換（変換キーを押す前）の入力を
+// 黒の点線で示すことを実機（Word）で確認した。旧コメント「ATOKに下線表示が
+// 無い」は誤りで、ダーク系テーマのMeryで検証していたため下線に気づけなかった
+// のが原因（Dev_note §7-1）。
 constexpr TF_DISPLAYATTRIBUTE kInputAttribute = {
-    {TF_CT_NONE, {}},  // text color
-    {TF_CT_NONE, {}},  // background color
-    TF_LS_NONE,        // underline style
-    FALSE,             // underline boldness
-    {TF_CT_NONE, {}},  // underline color
-    TF_ATTR_INPUT      // attribute info
+    {TF_CT_NONE, {}},                // text color
+    {TF_CT_NONE, {}},                // background color
+    TF_LS_DOT,                       // underline style: 黒の点線
+    FALSE,                           // underline boldness
+    {TF_CT_COLORREF, RGB(0, 0, 0)},  // underline color: 黒
+    TF_ATTR_INPUT                    // attribute info
 };
 
 constexpr std::wstring_view kConvertedDescription =
@@ -59,14 +62,29 @@ constexpr std::wstring_view kConvertedDescription =
 // atok-custom: ATOK風に「変換中」をシアンハイライトで明示する。
 // 色はATOK for Windows 一太郎2020 Limitedの実機スクリーンショットから
 // RGB値を実測して再現（背景=シアン、文字=黒）。
-// atok-custom: ATOKに下線表示が無いため、下線を非表示にする。
+// atok-custom: 2026-09-23改定。フォーカス文節であることを示すため、
+// 黒の太い実線の下線を追加（Dev_note §7-1）。
 constexpr TF_DISPLAYATTRIBUTE kConvertedAttribute = {
     {TF_CT_COLORREF, RGB(0, 0, 0)},      // text color: 黒
     {TF_CT_COLORREF, RGB(0, 255, 255)},  // background color: シアン
-    TF_LS_NONE,               // underline style
-    FALSE,                    // underline boldness
-    {TF_CT_NONE, {}},         // underline color
-    TF_ATTR_TARGET_CONVERTED  // attribute info
+    TF_LS_SOLID,                         // underline style: 実線
+    TRUE,                                // underline boldness: 太字
+    {TF_CT_COLORREF, RGB(0, 0, 0)},      // underline color: 黒
+    TF_ATTR_TARGET_CONVERTED             // attribute info
+};
+
+constexpr std::wstring_view kConvertedUnfocusedDescription =
+    L"TextService Display Attribute Converted (Unfocused)";
+// atok-custom: 2026-09-23新規。変換中でフォーカスが当たっていない文節を、
+// 未変換の生入力（点線）や確定済みの本文と区別するため、黒の実線の下線を表示
+// する（Dev_note §7-1）。背景色・文字色はホスト既定のまま変更しない。
+constexpr TF_DISPLAYATTRIBUTE kConvertedUnfocusedAttribute = {
+    {TF_CT_NONE, {}},                // text color
+    {TF_CT_NONE, {}},                // background color
+    TF_LS_SOLID,                     // underline style: 実線
+    FALSE,                           // underline boldness
+    {TF_CT_COLORREF, RGB(0, 0, 0)},  // underline color: 黒
+    TF_ATTR_CONVERTED                // attribute info
 };
 
 constexpr std::wstring_view kFocusedInputDescription =
@@ -74,13 +92,15 @@ constexpr std::wstring_view kFocusedInputDescription =
 // atok-custom: 区切り調整（Must #6）でひらがなに復帰したフォーカス中文節を、
 // 明示選択された変換候補（シアン）と区別するための色。色は仮値で、
 // 実機で見比べて微調整する（2026-09-11 時点で未実測）。
+// atok-custom: 2026-09-23改定。フォーカス文節であることを示すため、
+// 白の太い実線の下線を追加（Dev_note §7-1）。
 constexpr TF_DISPLAYATTRIBUTE kFocusedInputAttribute = {
     {TF_CT_COLORREF, RGB(255, 255, 255)},  // text color: 白
     {TF_CT_COLORREF, RGB(0, 0, 128)},      // background color: 紺色
-    TF_LS_NONE,               // underline style
-    FALSE,                    // underline boldness
-    {TF_CT_NONE, {}},         // underline color
-    TF_ATTR_TARGET_CONVERTED  // attribute info
+    TF_LS_SOLID,                           // underline style: 実線
+    TRUE,                                  // underline boldness: 太字
+    {TF_CT_COLORREF, RGB(255, 255, 255)},  // underline color: 白（紺背景用）
+    TF_ATTR_TARGET_CONVERTED               // attribute info
 };
 
 #ifdef GOOGLE_JAPANESE_INPUT_BUILD
@@ -106,6 +126,13 @@ constexpr GUID kDisplayAttributeFocusedInput = {
     0x4f1b,
     {0x9c, 0x3a, 0x1e, 0x7f, 0x2b, 0x4d, 0x6a, 0x80}};
 
+// atok-custom: {7A1D4E2F-9B83-4C6A-AE51-3F8C0D2E917B}
+constexpr GUID kDisplayAttributeConvertedUnfocused = {
+    0x7a1d4e2f,
+    0x9b83,
+    0x4c6a,
+    {0xae, 0x51, 0x3f, 0x8c, 0x0d, 0x2e, 0x91, 0x7b}};
+
 #else  // GOOGLE_JAPANESE_INPUT_BUILD
 
 // {84CA1E7E-3020-4D1C-8968-DDA372D1E067}
@@ -128,6 +155,13 @@ constexpr GUID kDisplayAttributeFocusedInput = {
     0x6b1d,
     0x4a8f,
     {0x9e, 0x3c, 0x2d, 0x5f, 0x8a, 0x1b, 0x7c, 0x40}};
+
+// atok-custom: {E4B8F2A1-5C9D-4E37-8A6F-1B4D7E2C9305}
+constexpr GUID kDisplayAttributeConvertedUnfocused = {
+    0xe4b8f2a1,
+    0x5c9d,
+    0x4e37,
+    {0x8a, 0x6f, 0x1b, 0x4d, 0x7e, 0x2c, 0x93, 0x05}};
 
 #endif  // !GOOGLE_JAPANESE_INPUT_BUILD
 
@@ -183,6 +217,15 @@ TipDisplayAttributeConverted::TipDisplayAttributeConverted()
 
 const GUID& TipDisplayAttributeConverted::guid() {
   return kDisplayAttributeConverted;
+}
+
+TipDisplayAttributeConvertedUnfocused::TipDisplayAttributeConvertedUnfocused()
+    : TipDisplayAttribute(kDisplayAttributeConvertedUnfocused,
+                          kConvertedUnfocusedAttribute,
+                          kConvertedUnfocusedDescription) {}
+
+const GUID& TipDisplayAttributeConvertedUnfocused::guid() {
+  return kDisplayAttributeConvertedUnfocused;
 }
 
 TipDisplayAttributeFocusedInput::TipDisplayAttributeFocusedInput()

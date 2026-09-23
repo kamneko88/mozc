@@ -670,6 +670,14 @@ class TipTextServiceImpl
       *attribute = MakeComPtr<TipDisplayAttributeInput>().detach();
     } else if (::IsEqualGUID(guid, TipDisplayAttributeConverted::guid())) {
       *attribute = MakeComPtr<TipDisplayAttributeConverted>().detach();
+    } else if (::IsEqualGUID(
+                   guid, TipDisplayAttributeConvertedUnfocused::guid())) {
+      // atok-custom: this case was missing even for the pre-existing
+      // TipDisplayAttributeFocusedInput; fixed together while touching
+      // this function (Dev_note §7-1).
+      *attribute = MakeComPtr<TipDisplayAttributeConvertedUnfocused>().detach();
+    } else if (::IsEqualGUID(guid, TipDisplayAttributeFocusedInput::guid())) {
+      *attribute = MakeComPtr<TipDisplayAttributeFocusedInput>().detach();
     } else {
       *attribute = nullptr;
       return E_INVALIDARG;
@@ -945,6 +953,9 @@ class TipTextServiceImpl
   TfGuidAtom input_attribute() const override { return input_attribute_; }
   TfGuidAtom converted_attribute() const override {
     return converted_attribute_;
+  }
+  TfGuidAtom converted_unfocused_attribute() const override {
+    return converted_unfocused_attribute_;
   }
   TfGuidAtom focused_input_attribute() const override {
     return focused_input_attribute_;
@@ -1317,6 +1328,11 @@ class TipTextServiceImpl
         TipDisplayAttributeInput::guid(), &input_attribute_));
     RETURN_IF_FAILED_HRESULT(category_->RegisterGUID(
         TipDisplayAttributeConverted::guid(), &converted_attribute_));
+    // atok-custom: register the display attribute for a converted segment
+    // that is not the focused/target segment.
+    RETURN_IF_FAILED_HRESULT(category_->RegisterGUID(
+        TipDisplayAttributeConvertedUnfocused::guid(),
+        &converted_unfocused_attribute_));
     // atok-custom: register the display attribute for a focused segment
     // reverted to its raw hiragana reading (Must #6).
     return category_->RegisterGUID(TipDisplayAttributeFocusedInput::guid(),
@@ -1476,6 +1492,8 @@ class TipTextServiceImpl
   // Represents the display attributes.
   TfGuidAtom input_attribute_;
   TfGuidAtom converted_attribute_;
+  // atok-custom: see TipDisplayAttributeConvertedUnfocused.
+  TfGuidAtom converted_unfocused_attribute_;
   // atok-custom: see TipDisplayAttributeFocusedInput.
   TfGuidAtom focused_input_attribute_;
 

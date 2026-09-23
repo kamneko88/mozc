@@ -78,6 +78,10 @@ STDMETHODIMP TipEnumDisplayAttributes::Next(
       // atok-custom: see TipDisplayAttributeFocusedInput.
       attribute_array[items] =
           MakeComPtr<TipDisplayAttributeFocusedInput>().detach();
+    } else if (index_ == 3) {
+      // atok-custom: see TipDisplayAttributeConvertedUnfocused.
+      attribute_array[items] =
+          MakeComPtr<TipDisplayAttributeConvertedUnfocused>().detach();
     } else {
       break;
     }

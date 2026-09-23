@@ -449,6 +449,10 @@ bool AddSegment(const absl::string_view key, const absl::string_view value,
     } else {
       segment->set_annotation(commands::Preedit::Segment::HIGHLIGHT);
     }
+  } else if (segment_type_mask & CONVERSION) {
+    // atok-custom: a converted-but-not-focused segment. Kept distinct from
+    // raw preedit (below) so it can get a different underline style.
+    segment->set_annotation(commands::Preedit::Segment::UNDERLINE_CONVERTED);
   } else {
     segment->set_annotation(commands::Preedit::Segment::UNDERLINE);
   }
