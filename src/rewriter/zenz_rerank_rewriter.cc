@@ -148,12 +148,14 @@ ZenzRerankRewriter::ZenzRerankRewriter(absl::string_view model_path)
   llama_context_params cparams = llama_context_default_params();
   cparams.n_ctx = 512;  // Prompts here are short: brief context + 1 segment.
   cparams.n_batch = 512;
-  // atok-custom: 8/16 logical processors (was 4; bumped 2026-09-18 after
-  // on-device feedback that conversion felt slightly sluggish). Kept below
-  // the full core count so it doesn't compete heavily with other apps
-  // (e.g. video/image editors) running at the same time.
-  cparams.n_threads = 8;        // TODO(要検証・要チューニング)
-  cparams.n_threads_batch = 8;  // TODO(要検証・要チューニング)
+  // atok-custom: back to 4 threads (2026-09-26). It was raised to 8 on
+  // 2026-09-18, but on-device feedback on 2026-09-23 reported very slow
+  // conversion while a heavy app (Photoshop) was running at the same time;
+  // the likely cause is CPU contention with other apps, and 4 threads felt
+  // fine before the bump. Do not raise it again without measuring with a
+  // heavy app running.
+  cparams.n_threads = 4;        // TODO(要検証・要チューニング)
+  cparams.n_threads_batch = 4;  // TODO(要検証・要チューニング)
 
   ctx_ = llama_init_from_model(model_, cparams);
   if (ctx_ == nullptr) {

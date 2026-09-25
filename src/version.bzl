@@ -42,7 +42,8 @@ MINOR = 34
 # atok-custom: incremented from 6244 to 6245 (ZenzRerankRewriter n_threads 4->8)
 # atok-custom: incremented from 6245 to 6246 (preedit underline styles: dotted
 # input / solid converted-unfocused / bold solid focused)
-BUILD_OSS = 6246
+# atok-custom: incremented from 6246 to 6247 (ZenzRerankRewriter n_threads 8->4)
+BUILD_OSS = 6247
 
 # Number to be increased. This value may be replaced by other tools.
 BUILD = BUILD_OSS
